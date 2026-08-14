@@ -44,6 +44,10 @@ async function runCodegraph(
       maxBuffer: 20 * 1024 * 1024,
       timeout: 300_000,
       signal: signal ?? undefined,
+      // Windows ships `.cmd`/`.ps1` shims (npx.cmd, codegraph.cmd) that a bare
+      // spawn cannot resolve (ENOENT) — route through the shell on win32, the
+      // same approach dsh's own plugin manager uses for pnpm.
+      shell: process.platform === 'win32',
     })
     return { stdout, stderr, exitCode: 0 }
   } catch (error: unknown) {
@@ -156,7 +160,8 @@ export function codegraphBuildTool(codegraphPath: string, defaultWorkdir: string
     },
     async execute(args, exec) {
       const workdir = args.workdir || defaultWorkdir
-      const subArgs = ['build']
+      // CLI v1.5+ renamed `build` to `sync` (incremental) / `index` (full rebuild).
+      const subArgs = args.force ? ['index'] : ['sync']
       if (args.force) subArgs.push('--force')
 
       const start = Date.now()
