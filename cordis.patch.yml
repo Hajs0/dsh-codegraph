@@ -1,0 +1,5 @@
+# dsh-codegraph plugin registration
+# Insert the codegraph plugin into the DSH plugin roster
+- insert:
+    - id: codegraph
+      name: '@dsh-plugin/codegraph'
